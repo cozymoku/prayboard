@@ -15,4 +15,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     // 2. 이 메서드는 boardId를 직접 참조하지 않고 board 엔티티의 id를 참조하므로 변경하지 않습니다.
     // 하지만 일관성을 위해 findByBoard_IdOrderByCreatedAtAsc 로 변경하는 것도 좋습니다.
     List<Comment> findByBoardIdOrderByCreatedAtAsc(Long boardId); // <-- 여기도 변경하는 게 안전합니다.
+
+    long countByBoardId(Long boardId);
 }

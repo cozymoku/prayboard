@@ -12,6 +12,7 @@ import com.pray.board.entity.Board;
 import com.pray.board.entity.BoardLikes;
 import com.pray.board.repository.BoardLikesRepository;
 import com.pray.board.repository.BoardRepository;
+import com.pray.board.repository.CommentRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -23,10 +24,12 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final BoardLikesRepository boardLikesRepository;
+    private final CommentRepository commentRepository;
 
-    public BoardService(BoardRepository boardRepository, BoardLikesRepository boardLikesRepository) {
+    public BoardService(BoardRepository boardRepository, BoardLikesRepository boardLikesRepository, CommentRepository commentRepository) {
         this.boardRepository = boardRepository;
         this.boardLikesRepository = boardLikesRepository;
+        this.commentRepository = commentRepository;
     }
     
     public Page<BoardResponseDto> getAllBoards(Pageable pageable) {
@@ -35,7 +38,8 @@ public class BoardService {
         return boardPage.map(board -> {
             long likeCount = boardLikesRepository.countByBoardIdAndIsLike(board.getId(), true);
             long dislikeCount = boardLikesRepository.countByBoardIdAndIsLike(board.getId(), false);
-            return new BoardResponseDto(board, likeCount, dislikeCount);
+            long commentCount = commentRepository.countByBoardId(board.getId());
+            return new BoardResponseDto(board, likeCount, dislikeCount, commentCount);
         });
     }
 
@@ -45,8 +49,9 @@ public class BoardService {
 
         long likeCount = boardLikesRepository.countByBoardIdAndIsLike(id, true);
         long dislikeCount = boardLikesRepository.countByBoardIdAndIsLike(id, false);
+        long commentCount = commentRepository.countByBoardId(board.getId());
 
-        return new BoardResponseDto(board, likeCount, dislikeCount);
+        return new BoardResponseDto(board, likeCount, dislikeCount, commentCount);
     }
 
     public Board getBoardEntityById(Long id) {

@@ -20,7 +20,6 @@ import com.pray.board.dto.BoardResponseDto;
 import com.pray.board.dto.LikeRequestDto;
 import com.pray.board.entity.Board;
 import com.pray.board.service.BoardService;
-import com.pray.board.service.CommentService;
 
 
 
@@ -29,11 +28,9 @@ import com.pray.board.service.CommentService;
 public class BoardController {
 
     private final BoardService boardService;
-    private final CommentService commentService;
 
-    public BoardController(BoardService boardService, CommentService commentService) {
+    public BoardController(BoardService boardService) {
         this.boardService = boardService;
-        this.commentService = commentService;
     }
 
     @GetMapping
