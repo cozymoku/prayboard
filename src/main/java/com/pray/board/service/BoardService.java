@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.pray.board.dto.BoardResponseDto;
 import com.pray.board.entity.Board;
 import com.pray.board.entity.BoardLikes;
 import com.pray.board.repository.BoardLikesRepository;
@@ -28,12 +29,29 @@ public class BoardService {
         this.boardLikesRepository = boardLikesRepository;
     }
     
-    public Page<Board> getAllBoard(Pageable pageable) {
-        return boardRepository.findAll(pageable);
+    public Page<BoardResponseDto> getAllBoards(Pageable pageable) {
+        Page<Board> boardPage = boardRepository.findAll(pageable);
+
+        return boardPage.map(board -> {
+            long likeCount = boardLikesRepository.countByBoardIdAndIsLike(board.getId(), true);
+            long dislikeCount = boardLikesRepository.countByBoardIdAndIsLike(board.getId(), false);
+            return new BoardResponseDto(board, likeCount, dislikeCount);
+        });
     }
 
-    public Optional<Board> getBoardById(Long id) {
-        return boardRepository.findById(id);
+    public BoardResponseDto getBoardById(Long id) {
+        Board board = boardRepository.findById(id) 
+            .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다: " + id));
+
+        long likeCount = boardLikesRepository.countByBoardIdAndIsLike(id, true);
+        long dislikeCount = boardLikesRepository.countByBoardIdAndIsLike(id, false);
+
+        return new BoardResponseDto(board, likeCount, dislikeCount);
+    }
+
+    public Board getBoardEntityById(Long id) {
+        return boardRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다: " + id));
     }
 
     @Transactional

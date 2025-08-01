@@ -23,6 +23,8 @@ public class BoardResponseDto {
     private String author;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private long likeCount;
+    private long dislikeCount;
     
 
     public BoardResponseDto(Board board) {
@@ -32,5 +34,16 @@ public class BoardResponseDto {
         this.author = board.getAuthor();
         this.createdAt = board.getCreatedAt();
         this.updatedAt = board.getUpdatedAt();
+    }
+
+    public BoardResponseDto(Board board, long likeCount, long dislikeCount) {
+        this.id = board.getId();
+        this.title = board.getTitle();
+        this.content = board.getContent();
+        this.author = board.getAuthor();
+        this.createdAt = board.getCreatedAt();
+        this.updatedAt = board.getUpdatedAt();
+        this.likeCount = likeCount;
+        this.dislikeCount = dislikeCount;
     }
 }

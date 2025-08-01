@@ -40,17 +40,14 @@ public class BoardController {
     public ResponseEntity<Page<BoardResponseDto>> getAllBoards(
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<Board> boardPage = boardService.getAllBoard(pageable);
-        Page<BoardResponseDto> dtoPage = boardPage.map(BoardResponseDto::new);
+        Page<BoardResponseDto> dtoPage = boardService.getAllBoards(pageable);
         return new ResponseEntity<>(dtoPage, HttpStatus.OK);
     }
     
     @GetMapping("/{id}")    
     public ResponseEntity<BoardResponseDto> getBoardById(@PathVariable("id") Long id) {
-        return boardService.getBoardById(id)
-                .map(BoardResponseDto::new)
-                .map(dto -> new ResponseEntity<>(dto, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        BoardResponseDto dto = boardService.getBoardById(id);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @PostMapping
@@ -67,23 +64,18 @@ public class BoardController {
 
     @PutMapping("/{id}")
     public ResponseEntity<BoardResponseDto> updateBoard(@PathVariable("id") Long id, @RequestBody BoardRequestDto boardRequestDto) {
-        return boardService.getBoardById(id)
-                .map(existingBoard -> {
-                    existingBoard.setTitle(boardRequestDto.getTitle());
-                    existingBoard.setContent(boardRequestDto.getContent());
-                    existingBoard.setAuthor(boardRequestDto.getAuthor());
+        Board existingBoard = boardService.getBoardEntityById(id);
 
-                    Board updatedBoard = boardService.saveBoard(existingBoard);
-                    return new ResponseEntity<>(new BoardResponseDto(updatedBoard), HttpStatus.OK);
-                })
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        existingBoard.setTitle(boardRequestDto.getTitle());
+        existingBoard.setContent(boardRequestDto.getContent());
+        existingBoard.setAuthor(boardRequestDto.getAuthor());
+
+        Board updatedBoard = boardService.saveBoard(existingBoard);
+        return new ResponseEntity<>(new BoardResponseDto(updatedBoard), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBoard(@PathVariable("id") Long id) {
-        if(boardService.getBoardById(id).isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
         boardService.deleteBoard(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
