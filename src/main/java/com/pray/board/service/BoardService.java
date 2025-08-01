@@ -2,14 +2,17 @@ package com.pray.board.service;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pray.board.entity.Board;
+import com.pray.board.entity.BoardLikes;
+import com.pray.board.repository.BoardLikesRepository;
 import com.pray.board.repository.BoardRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 
 
 
@@ -18,10 +21,11 @@ import com.pray.board.repository.BoardRepository;
 public class BoardService {
 
     private final BoardRepository boardRepository;
+    private final BoardLikesRepository boardLikesRepository;
 
-    @Autowired
-    public BoardService(BoardRepository boardRepository) {
+    public BoardService(BoardRepository boardRepository, BoardLikesRepository boardLikesRepository) {
         this.boardRepository = boardRepository;
+        this.boardLikesRepository = boardLikesRepository;
     }
     
     public Page<Board> getAllBoard(Pageable pageable) {
@@ -40,5 +44,30 @@ public class BoardService {
     @Transactional
     public void deleteBoard(Long id) {
         boardRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void toggleLike(Long boardId, String author, boolean isLike) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다: " + boardId));
+
+        Optional<BoardLikes> existingLike = boardLikesRepository.findByBoardIdAndAuthor(boardId, author);
+
+        if (existingLike.isPresent()) {
+            BoardLikes like = existingLike.get();
+            if (like.getIsLike() == isLike) {
+                boardLikesRepository.delete(like);
+            } else {
+                like.setIsLike(isLike);
+                boardLikesRepository.save(like);
+            }
+        } else {
+            BoardLikes newLike = BoardLikes.builder()
+                    .board(board)
+                    .author(author)
+                    .isLike(isLike)
+                    .build();
+            boardLikesRepository.save(newLike);
+        }
     }
 }

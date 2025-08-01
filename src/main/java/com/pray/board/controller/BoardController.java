@@ -1,6 +1,5 @@
 package com.pray.board.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,8 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.pray.board.dto.BoardRequestDto;
 import com.pray.board.dto.BoardResponseDto;
+import com.pray.board.dto.LikeRequestDto;
 import com.pray.board.entity.Board;
 import com.pray.board.service.BoardService;
+import com.pray.board.service.CommentService;
 
 
 
@@ -28,10 +29,11 @@ import com.pray.board.service.BoardService;
 public class BoardController {
 
     private final BoardService boardService;
+    private final CommentService commentService;
 
-    @Autowired
-    public BoardController(BoardService boardService) {
+    public BoardController(BoardService boardService, CommentService commentService) {
         this.boardService = boardService;
+        this.commentService = commentService;
     }
 
     @GetMapping
@@ -84,5 +86,11 @@ public class BoardController {
         }
         boardService.deleteBoard(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("/{boardId}/likes")
+    public ResponseEntity<Void> toggleLike(@PathVariable Long boardId, @RequestBody LikeRequestDto requestDto) {
+        boardService.toggleLike(boardId, requestDto.getAuthor(), requestDto.getIsLike());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
