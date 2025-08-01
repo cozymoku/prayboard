@@ -1,4 +1,4 @@
-package com.pray.board.dto.controller;
+package com.pray.board.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
